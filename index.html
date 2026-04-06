@@ -1,0 +1,423 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Семейная галерея</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;}
+:root{
+  --bg:#0a0a0a;
+  --surface:#141414;
+  --surface2:#1e1e1e;
+  --border:#2a2a2a;
+  --text:#f0f0f0;
+  --muted:#888;
+  --accent:#c8a96e;
+  --accent2:#e8c88e;
+}
+body{background:var(--bg);color:var(--text);font-family:'Georgia',serif;min-height:100vh;overflow-x:hidden;}
+button{cursor:pointer;font-family:inherit;}
+
+/* HOME */
+#home{padding:0;}
+.home-header{padding:3rem 2rem 2rem;text-align:center;border-bottom:1px solid var(--border);}
+.home-header h1{font-size:clamp(1.8rem,4vw,3rem);font-weight:400;letter-spacing:.08em;color:var(--accent);margin-bottom:.5rem;}
+.home-header p{font-size:1rem;color:var(--muted);font-style:italic;}
+
+.trio-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(280px,1fr));gap:1px;background:var(--border);}
+.trio-card{background:var(--surface);padding:0;cursor:pointer;transition:background .2s;position:relative;overflow:hidden;}
+.trio-card:hover{background:var(--surface2);}
+.trio-thumb{width:100%;aspect-ratio:4/3;object-fit:cover;display:block;opacity:.85;transition:opacity .3s;}
+.trio-card:hover .trio-thumb{opacity:1;}
+.trio-info{padding:1.25rem 1.5rem 1.5rem;}
+.trio-num{font-size:.75rem;color:var(--accent);letter-spacing:.15em;text-transform:uppercase;margin-bottom:.4rem;}
+.trio-title{font-size:1.05rem;color:var(--text);line-height:1.4;}
+
+/* GALLERY */
+#gallery{display:none;}
+.gallery-top{display:flex;align-items:center;gap:1rem;padding:.75rem 1.5rem;border-bottom:1px solid var(--border);background:var(--surface);}
+.back-btn{background:none;border:1px solid var(--border);color:var(--muted);padding:.4rem .9rem;font-size:.85rem;border-radius:2px;transition:all .2s;}
+.back-btn:hover{border-color:var(--accent);color:var(--accent);}
+.gallery-title{font-size:.95rem;color:var(--muted);font-style:italic;flex:1;text-align:center;}
+.mode-tabs{display:flex;gap:1px;background:var(--border);}
+.mode-tab{background:var(--surface2);border:none;color:var(--muted);padding:.4rem 1rem;font-size:.8rem;letter-spacing:.05em;transition:all .2s;}
+.mode-tab.active{background:var(--accent);color:#000;}
+
+/* STUDY MODE */
+#study-mode{}
+.artist-nav{display:flex;border-bottom:1px solid var(--border);}
+.artist-tab{flex:1;background:none;border:none;border-bottom:2px solid transparent;color:var(--muted);padding:.75rem .5rem;font-size:.85rem;transition:all .2s;text-align:center;}
+.artist-tab.active{color:var(--accent);border-bottom-color:var(--accent);}
+.artist-tab:hover{color:var(--text);}
+
+.artist-view{display:flex;min-height:calc(100vh - 130px);}
+.painting-col{flex:1;position:relative;background:#000;}
+.painting-main{width:100%;height:calc(100vh - 200px);object-fit:contain;display:block;}
+.painting-thumbs{display:flex;gap:2px;padding:2px;background:var(--border);}
+.thumb-btn{flex:1;border:none;padding:0;background:none;cursor:pointer;opacity:.5;transition:opacity .2s;border:2px solid transparent;}
+.thumb-btn.active{opacity:1;border-color:var(--accent);}
+.thumb-btn:hover{opacity:.8;}
+.thumb-btn img{width:100%;aspect-ratio:1;object-fit:cover;display:block;}
+
+.info-col{width:340px;background:var(--surface);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+.artist-name-big{font-size:1.6rem;font-weight:400;color:var(--accent);padding:1.5rem 1.5rem .75rem;border-bottom:1px solid var(--border);}
+.bio-text{padding:1.25rem 1.5rem;font-size:.9rem;line-height:1.8;color:#ccc;white-space:pre-line;flex:1;}
+.hint-section{margin:0 1rem 1rem;padding:1rem;background:var(--surface2);border-radius:4px;border-left:3px solid var(--accent);}
+.hint-label{font-size:.7rem;color:var(--accent);letter-spacing:.12em;text-transform:uppercase;margin-bottom:.5rem;}
+.hint-text{font-size:.85rem;line-height:1.6;color:#aaa;font-style:italic;}
+.next-artist-btn{margin:1rem;padding:.75rem;background:none;border:1px solid var(--border);color:var(--muted);font-size:.85rem;border-radius:2px;text-align:center;transition:all .2s;}
+.next-artist-btn:hover,.next-artist-btn:not(:disabled):hover{border-color:var(--accent);color:var(--accent);}
+
+/* QUIZ MODE */
+#quiz-mode{padding:2rem;max-width:900px;margin:0 auto;}
+.quiz-header{text-align:center;margin-bottom:2rem;}
+.quiz-header h2{font-size:1.3rem;font-weight:400;color:var(--accent);margin-bottom:.5rem;}
+.quiz-header p{color:var(--muted);font-size:.9rem;}
+
+.collage-display{margin-bottom:2rem;}
+.collage-display img{width:100%;border-radius:4px;max-height:500px;object-fit:contain;background:#000;}
+
+.quiz-options{display:grid;grid-template-columns:1fr 1fr 1fr;gap:.75rem;margin-bottom:1.5rem;}
+.quiz-opt{background:var(--surface);border:1px solid var(--border);color:var(--text);padding:.9rem 1rem;font-size:1rem;font-family:'Georgia',serif;border-radius:2px;transition:all .2s;text-align:center;}
+.quiz-opt:hover:not(:disabled){border-color:var(--accent);background:var(--surface2);}
+.quiz-opt.correct{background:#1a3a1a;border-color:#4a9a4a;color:#8eda8e;}
+.quiz-opt.wrong{background:#3a1a1a;border-color:#9a4a4a;color:#da8e8e;}
+.quiz-opt:disabled{cursor:default;}
+
+.quiz-result{text-align:center;padding:1.5rem;background:var(--surface);border-radius:4px;margin-bottom:1rem;display:none;}
+.quiz-result.show{display:block;}
+.result-text{font-size:1.1rem;margin-bottom:1rem;}
+.next-q-btn{background:none;border:1px solid var(--accent);color:var(--accent);padding:.6rem 1.5rem;font-size:.9rem;font-family:'Georgia',serif;border-radius:2px;transition:all .2s;}
+.next-q-btn:hover{background:var(--accent);color:#000;}
+
+.quiz-progress{display:flex;gap:.5rem;align-items:center;justify-content:center;margin-bottom:1.5rem;}
+.prog-dot{width:8px;height:8px;border-radius:50%;background:var(--border);}
+.prog-dot.done{background:var(--accent);}
+.prog-dot.current{background:var(--text);}
+
+/* FULLSCREEN */
+#fullscreen-overlay{display:none;position:fixed;inset:0;background:#000;z-index:100;flex-direction:column;align-items:center;justify-content:center;}
+#fullscreen-overlay.show{display:flex;}
+#fullscreen-img{max-width:100%;max-height:100vh;object-fit:contain;}
+.fs-close{position:fixed;top:1rem;right:1.5rem;background:none;border:none;color:var(--muted);font-size:2rem;cursor:pointer;z-index:101;line-height:1;}
+.fs-nav{position:fixed;bottom:1.5rem;display:flex;gap:1rem;}
+.fs-nav button{background:rgba(255,255,255,.1);border:none;color:#fff;padding:.5rem 1.2rem;font-size:.9rem;cursor:pointer;border-radius:2px;}
+.fs-nav button:hover{background:rgba(255,255,255,.2);}
+
+@media(max-width:768px){
+  .artist-view{flex-direction:column;}
+  .info-col{width:100%;border-left:none;border-top:1px solid var(--border);}
+  .painting-main{height:50vw;}
+  .quiz-options{grid-template-columns:1fr;}
+  .gallery-top{flex-wrap:wrap;}
+}
+</style>
+</head>
+<body>
+
+<!-- HOME -->
+<div id="home">
+  <div class="home-header">
+    <h1>Семейная галерея</h1>
+    <p>Смотрим картины вместе — угадываем художника</p>
+  </div>
+  <div class="trio-grid" id="trio-grid"></div>
+</div>
+
+<!-- GALLERY -->
+<div id="gallery">
+  <div class="gallery-top">
+    <button class="back-btn" onclick="goHome()">← Все тройки</button>
+    <div class="gallery-title" id="gallery-title"></div>
+    <div class="mode-tabs">
+      <button class="mode-tab active" id="tab-study" onclick="setMode('study')">Изучить</button>
+      <button class="mode-tab" id="tab-quiz" onclick="setMode('quiz')">Угадать</button>
+    </div>
+  </div>
+
+  <!-- STUDY -->
+  <div id="study-mode">
+    <div class="artist-nav" id="artist-nav"></div>
+    <div class="artist-view">
+      <div class="painting-col">
+        <img id="painting-main" class="painting-main" src="" alt="" onclick="openFullscreen()">
+        <div class="painting-thumbs" id="painting-thumbs"></div>
+      </div>
+      <div class="info-col">
+        <div class="artist-name-big" id="artist-name-big"></div>
+        <div class="bio-text" id="bio-text"></div>
+        <div class="hint-section">
+          <div class="hint-label">Подсказка родителю</div>
+          <div class="hint-text" id="hint-text"></div>
+        </div>
+        <button class="next-artist-btn" id="next-artist-btn" onclick="nextArtist()">Следующий художник →</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- QUIZ -->
+  <div id="quiz-mode" style="display:none;">
+    <div class="quiz-header">
+      <h2>Угадайте художника</h2>
+      <p id="quiz-type-label"></p>
+    </div>
+    <div class="quiz-progress" id="quiz-progress"></div>
+    <div class="collage-display">
+      <img id="quiz-img" src="" alt="">
+    </div>
+    <div class="quiz-options" id="quiz-options"></div>
+    <div class="quiz-result" id="quiz-result">
+      <div class="result-text" id="result-text"></div>
+      <button class="next-q-btn" id="next-q-btn" onclick="nextQuestion()">Следующая →</button>
+    </div>
+  </div>
+</div>
+
+<!-- FULLSCREEN -->
+<div id="fullscreen-overlay">
+  <button class="fs-close" onclick="closeFullscreen()">×</button>
+  <img id="fullscreen-img" src="" alt="">
+  <div class="fs-nav">
+    <button onclick="fsNav(-1)">← Пред</button>
+    <button onclick="fsNav(1)">След →</button>
+  </div>
+</div>
+
+<script src="data.js"></script>
+<script>
+let currentTrio = null;
+let currentArtistIdx = 0;
+let currentPaintingIdx = 0;
+let quizQuestions = [];
+let quizCurrent = 0;
+let quizScore = 0;
+let quizAnswered = false;
+
+// ── HOME ──────────────────────────────────────────
+function renderHome() {
+  const grid = document.getElementById('trio-grid');
+  grid.innerHTML = '';
+  DATA.trios.forEach((trio, i) => {
+    const card = document.createElement('div');
+    card.className = 'trio-card';
+    card.onclick = () => openTrio(i);
+    card.innerHTML = `
+      <img class="trio-thumb" src="${trio.collages[0]}" alt="${trio.title}" loading="lazy">
+      <div class="trio-info">
+        <div class="trio-num">Тройка ${i+1}</div>
+        <div class="trio-title">${trio.title}</div>
+      </div>`;
+    grid.appendChild(card);
+  });
+}
+
+function goHome() {
+  document.getElementById('home').style.display = '';
+  document.getElementById('gallery').style.display = 'none';
+}
+
+// ── TRIO / GALLERY ──────────────────────────────────
+function openTrio(idx) {
+  currentTrio = DATA.trios[idx];
+  currentArtistIdx = 0;
+  currentPaintingIdx = 0;
+  document.getElementById('home').style.display = 'none';
+  document.getElementById('gallery').style.display = 'block';
+  document.getElementById('gallery-title').textContent = currentTrio.title;
+  setMode('study');
+}
+
+function setMode(mode) {
+  document.getElementById('tab-study').classList.toggle('active', mode==='study');
+  document.getElementById('tab-quiz').classList.toggle('active', mode==='quiz');
+  document.getElementById('study-mode').style.display = mode==='study' ? '' : 'none';
+  document.getElementById('quiz-mode').style.display = mode==='quiz' ? '' : 'none';
+  if (mode === 'study') renderStudy();
+  if (mode === 'quiz') initQuiz();
+}
+
+// ── STUDY ──────────────────────────────────────────
+function renderStudy() {
+  const trio = currentTrio;
+  // Artist tabs
+  const nav = document.getElementById('artist-nav');
+  nav.innerHTML = '';
+  trio.artists.forEach((a, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'artist-tab' + (i === currentArtistIdx ? ' active' : '');
+    btn.textContent = a.name;
+    btn.onclick = () => { currentArtistIdx = i; currentPaintingIdx = 0; renderStudy(); };
+    nav.appendChild(btn);
+  });
+  renderArtist();
+}
+
+function renderArtist() {
+  const artist = currentTrio.artists[currentArtistIdx];
+  document.getElementById('artist-name-big').textContent = artist.name;
+  document.getElementById('bio-text').textContent = artist.bio;
+  document.getElementById('hint-text').textContent = artist.hint;
+
+  // Main image
+  const main = document.getElementById('painting-main');
+  main.src = artist.images[currentPaintingIdx];
+
+  // Thumbnails
+  const thumbs = document.getElementById('painting-thumbs');
+  thumbs.innerHTML = '';
+  artist.images.forEach((src, i) => {
+    const btn = document.createElement('button');
+    btn.className = 'thumb-btn' + (i === currentPaintingIdx ? ' active' : '');
+    btn.innerHTML = `<img src="${src}" loading="lazy">`;
+    btn.onclick = () => { currentPaintingIdx = i; renderArtist(); };
+    thumbs.appendChild(btn);
+  });
+
+  // Next button
+  const nextBtn = document.getElementById('next-artist-btn');
+  if (currentArtistIdx < currentTrio.artists.length - 1) {
+    nextBtn.textContent = `Следующий: ${currentTrio.artists[currentArtistIdx+1].name} →`;
+    nextBtn.style.display = '';
+  } else {
+    nextBtn.textContent = 'Перейти к угадыванию →';
+    nextBtn.onclick = () => setMode('quiz');
+    nextBtn.style.display = '';
+  }
+}
+
+function nextArtist() {
+  if (currentArtistIdx < currentTrio.artists.length - 1) {
+    currentArtistIdx++;
+    currentPaintingIdx = 0;
+    renderStudy();
+  } else {
+    setMode('quiz');
+  }
+}
+
+// ── FULLSCREEN ──────────────────────────────────────
+function openFullscreen() {
+  const artist = currentTrio.artists[currentArtistIdx];
+  document.getElementById('fullscreen-img').src = artist.images[currentPaintingIdx];
+  document.getElementById('fullscreen-overlay').classList.add('show');
+}
+function closeFullscreen() {
+  document.getElementById('fullscreen-overlay').classList.remove('show');
+}
+function fsNav(dir) {
+  const artist = currentTrio.artists[currentArtistIdx];
+  currentPaintingIdx = (currentPaintingIdx + dir + artist.images.length) % artist.images.length;
+  document.getElementById('fullscreen-img').src = artist.images[currentPaintingIdx];
+  document.getElementById('painting-main').src = artist.images[currentPaintingIdx];
+  document.querySelectorAll('.thumb-btn').forEach((b,i) => b.classList.toggle('active', i===currentPaintingIdx));
+}
+document.addEventListener('keydown', e => {
+  if (document.getElementById('fullscreen-overlay').classList.contains('show')) {
+    if (e.key === 'ArrowRight') fsNav(1);
+    if (e.key === 'ArrowLeft') fsNav(-1);
+    if (e.key === 'Escape') closeFullscreen();
+  }
+});
+
+// ── QUIZ ──────────────────────────────────────────
+function buildQuizQuestions() {
+  const trio = currentTrio;
+  const questions = [];
+  // For each artist: show 2 collages from their set + quiz
+  // Simpler: show each of the 3 trio collages and ask who made it
+  // Use collage images tagged per artist (MyCollages 15/16/17 = artist 1/2/3)
+  trio.collages.forEach((colSrc, i) => {
+    const correct = trio.artists[i];
+    const others = trio.artists.filter((_,j) => j !== i);
+    questions.push({ img: colSrc, correct: correct.name, options: shuffle([correct.name, ...others.map(a=>a.name)]) });
+  });
+  // Also add individual paintings
+  trio.artists.forEach((artist, ai) => {
+    [2, 5].forEach(pi => {
+      if (artist.images[pi]) {
+        const others = trio.artists.filter((_,j) => j !== ai);
+        questions.push({ img: artist.images[pi], correct: artist.name, options: shuffle([artist.name, ...others.map(a=>a.name)]) });
+      }
+    });
+  });
+  return shuffle(questions);
+}
+
+function shuffle(arr) { return [...arr].sort(() => Math.random() - .5); }
+
+function initQuiz() {
+  quizQuestions = buildQuizQuestions();
+  quizCurrent = 0;
+  quizScore = 0;
+  quizAnswered = false;
+  document.getElementById('quiz-type-label').textContent = `По тройке: ${currentTrio.title}`;
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = quizQuestions[quizCurrent];
+  document.getElementById('quiz-img').src = q.img;
+
+  // Progress dots
+  const prog = document.getElementById('quiz-progress');
+  prog.innerHTML = '';
+  quizQuestions.forEach((_,i) => {
+    const d = document.createElement('div');
+    d.className = 'prog-dot' + (i < quizCurrent ? ' done' : i === quizCurrent ? ' current' : '');
+    prog.appendChild(d);
+  });
+
+  // Options
+  const opts = document.getElementById('quiz-options');
+  opts.innerHTML = '';
+  q.options.forEach(name => {
+    const btn = document.createElement('button');
+    btn.className = 'quiz-opt';
+    btn.textContent = name;
+    btn.onclick = () => answer(name, q.correct, btn);
+    opts.appendChild(btn);
+  });
+
+  document.getElementById('quiz-result').classList.remove('show');
+  quizAnswered = false;
+}
+
+function answer(chosen, correct, btn) {
+  if (quizAnswered) return;
+  quizAnswered = true;
+  const isCorrect = chosen === correct;
+  if (isCorrect) quizScore++;
+
+  document.querySelectorAll('.quiz-opt').forEach(b => {
+    b.disabled = true;
+    if (b.textContent === correct) b.classList.add('correct');
+    if (b === btn && !isCorrect) b.classList.add('wrong');
+  });
+
+  const result = document.getElementById('quiz-result');
+  document.getElementById('result-text').textContent = isCorrect
+    ? `✓ Верно! Это ${correct}.`
+    : `✗ Это ${correct}. Присмотритесь к деталям!`;
+
+  const nextBtn = document.getElementById('next-q-btn');
+  if (quizCurrent >= quizQuestions.length - 1) {
+    nextBtn.textContent = `Итог: ${quizScore} из ${quizQuestions.length}`;
+    nextBtn.onclick = () => { quizCurrent = 0; quizScore = 0; initQuiz(); };
+  } else {
+    nextBtn.textContent = 'Следующая →';
+    nextBtn.onclick = nextQuestion;
+  }
+  result.classList.add('show');
+}
+
+function nextQuestion() {
+  quizCurrent++;
+  if (quizCurrent < quizQuestions.length) renderQuestion();
+}
+
+// ── INIT ──────────────────────────────────────────
+renderHome();
+</script>
+</body>
+</html>
