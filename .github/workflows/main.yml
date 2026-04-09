@@ -1,0 +1,16 @@
+name: Fix filenames
+on: workflow_dispatch
+jobs:
+  rename:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - name: Swap haring and gogen
+        run: |
+          cd images
+          for f in trio6_haring_*.jpg; do mv "$f" "TEMP_${f}"; done
+          for f in trio6_gogen_*.jpg; do mv "$f" "${f/gogen/haring}"; done
+          for f in TEMP_trio6_haring_*.jpg; do mv "$f" "${f/TEMP_trio6_haring/trio6_gogen}"; done
+      - uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: Swap haring and gogen images
